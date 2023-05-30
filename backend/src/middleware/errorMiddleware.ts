@@ -1,5 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 
+/**
+ * Middleware for handling 404 errors (Not Found).
+ *
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ * @param {import('express').NextFunction} next - The Express next function.
+ * @returns {void}
+ */
 const notFound = (req: Request, res: Response, next: NextFunction): void => {
 	const error: Error = new Error(`Not Found - ${req.originalUrl}`);
 	res.status(404);
