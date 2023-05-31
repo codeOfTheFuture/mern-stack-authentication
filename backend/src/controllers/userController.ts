@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+import generateToken from "../utils/generateToken.ts";
 
 import User, { UserSchema } from "../models/userModel.ts";
 import { Document } from "mongoose";
@@ -31,6 +32,8 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
 	});
 
 	if (user) {
+		generateToken(res, user._id.toString());
+
 		res.status(201).json({
 			_id: user._id,
 			name: user.name,
