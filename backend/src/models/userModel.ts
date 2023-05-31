@@ -1,7 +1,8 @@
-import mongoose, { CallbackWithoutResultAndOptionalError, Model, Schema } from "mongoose";
+import mongoose, { CallbackWithoutResultAndOptionalError, Model, ObjectId, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 
-export interface User {
+export interface UserType {
+	_id: ObjectId;
 	name: string;
 	email: string;
 	password: string;
@@ -23,7 +24,11 @@ export interface UserSchema {
 	};
 }
 
-const userSchema: Schema<User, Model<UserSchema>> = new mongoose.Schema(
+export interface SchemaMethods {
+	matchPassword: (enteredPassword: string) => Promise<boolean>;
+}
+
+const userSchema: Schema<UserType, Model<UserSchema>, SchemaMethods> = new mongoose.Schema(
 	{
 		name: {
 			type: String,
@@ -53,6 +58,10 @@ userSchema.pre("save", async function (next: CallbackWithoutResultAndOptionalErr
 	this.password = await bcrypt.hash(this.password, salt);
 });
 
-const User: Model<User> = mongoose.model("User", userSchema);
+userSchema.methods.matchPassword = async function (enteredPassword: string) {
+	return await bcrypt.compare(enteredPassword, this.password);
+};
+
+const User: Model<UserType, {}, SchemaMethods> = mongoose.model("User", userSchema);
 
 export default User;
