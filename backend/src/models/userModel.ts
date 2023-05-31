@@ -1,6 +1,13 @@
-import mongoose, { Model, Schema } from "mongoose";
+import mongoose, { CallbackWithoutResultAndOptionalError, Model, Schema } from "mongoose";
+import bcrypt from "bcryptjs";
 
-interface UserSchema {
+export interface User {
+	name: string;
+	email: string;
+	password: string;
+}
+
+export interface UserSchema {
 	name: {
 		type: StringConstructor;
 		required: true;
@@ -16,7 +23,7 @@ interface UserSchema {
 	};
 }
 
-const userSchema: Schema<UserSchema> = new mongoose.Schema(
+const userSchema: Schema<User, Model<UserSchema>> = new mongoose.Schema(
 	{
 		name: {
 			type: String,
@@ -37,6 +44,15 @@ const userSchema: Schema<UserSchema> = new mongoose.Schema(
 	}
 );
 
-const User: Model<UserSchema> = mongoose.model("User", userSchema);
+userSchema.pre("save", async function (next: CallbackWithoutResultAndOptionalError) {
+	if (!this.isModified("password")) {
+		next();
+	}
+
+	const salt: string = await bcrypt.genSalt();
+	this.password = await bcrypt.hash(this.password, salt);
+});
+
+const User: Model<User> = mongoose.model("User", userSchema);
 
 export default User;
