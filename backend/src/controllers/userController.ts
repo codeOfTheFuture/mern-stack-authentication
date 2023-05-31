@@ -4,7 +4,7 @@ import generateToken from "../utils/generateToken";
 
 import User, { UserType } from "../models/userModel.ts";
 
-interface RequestBody {
+interface ReqBody {
 	name: string;
 	email: string;
 	password: string;
@@ -14,7 +14,7 @@ interface RequestBody {
 // route    POST /api/users/auth
 // @access  Public
 const authUser = asyncHandler(
-	async (req: Request<null, null, RequestBody>, res: Response): Promise<void> => {
+	async (req: Request<null, null, ReqBody>, res: Response): Promise<void> => {
 		const { email, password } = req.body;
 
 		const user = await User.findOne({ email });
@@ -38,7 +38,7 @@ const authUser = asyncHandler(
 // route    POST /api/users
 // @access  Public
 const registerUser = asyncHandler(
-	async (req: Request<null, null, RequestBody>, res: Response): Promise<void> => {
+	async (req: Request<null, null, ReqBody>, res: Response): Promise<void> => {
 		const { name, email, password } = req.body;
 
 		const userInDatabase = await User.findOne({ email });
@@ -81,25 +81,49 @@ const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<voi
 	res.status(200).json({ message: "User logged out" });
 });
 
-interface UserProfileRequest extends Request {
+interface UserProfileRequest<ReqBody = any> extends Request {
 	user?: UserType;
+	body: ReqBody;
 }
 
 // @desc    Get user profile
 // route    GET /api/users/profile
 // @access  Private
-const getUserProfile = asyncHandler(async (req: UserProfileRequest, res: Response) => {
-	const { _id, name, email, createdAt, updatedAt } = req.user as UserType;
-	const user: UserType = { _id, name, email, createdAt, updatedAt } as UserType;
-
-	res.status(200).json(user);
-});
+const getUserProfile = asyncHandler(
+	async (req: UserProfileRequest<ReqBody>, res: Response): Promise<void> => {
+		res.status(200).json(req.user);
+	}
+);
 
 // @desc    Update user profile
 // route    PUT /api/users/profile
 // @access  Private
-const updateUserProfile = asyncHandler(async (req: Request, res: Response) => {
-	res.status(200).json({ message: "Update user profile" });
-});
+const updateUserProfile = asyncHandler(
+	async (req: UserProfileRequest<ReqBody>, res: Response): Promise<void> => {
+		const user = await User.findById(req.user?._id);
+
+		if (user) {
+			user.name = req.body.name || user.name;
+			user.email = req.body.email || user.email;
+
+			if (req.body.password) {
+				user.password = req.body.password;
+			}
+
+			const updatedUser = await user.save();
+
+			res.status(200).json({
+				_id: updatedUser._id,
+				name: updatedUser.name,
+				email: updatedUser.email,
+				createdAt: updatedUser.createdAt,
+				updatedAt: updatedUser.updatedAt,
+			});
+		} else {
+			res.status(404);
+			throw new Error("User not found");
+		}
+	}
+);
 
 export { authUser, registerUser, logoutUser, getUserProfile, updateUserProfile };

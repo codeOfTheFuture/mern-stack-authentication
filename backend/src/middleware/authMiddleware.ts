@@ -2,7 +2,8 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import { NextFunction, Request, Response } from "express";
 
-import User, { UserType } from "../models/userModel";
+import User, { SchemaMethods, UserType } from "../models/userModel";
+import { Document, ObjectId } from "mongoose";
 
 const JWT_SECRET: string = process.env.JWT_SECRET as string;
 
@@ -15,7 +16,11 @@ const JWT_SECRET: string = process.env.JWT_SECRET as string;
  * @property {{ jwt: string | null }} cookies - The cookies object.
  */
 interface AuthRequest extends Request {
-	user?: UserType;
+	user?:
+		| (Document<unknown, {}, UserType> &
+				Omit<UserType & Required<{ _id: ObjectId }>, "matchPassword"> &
+				SchemaMethods)
+		| null;
 	cookies: { jwt: string | null };
 }
 
@@ -38,7 +43,7 @@ const protect = asyncHandler(
 				const decoded: JwtPayload = jwt.verify(token, JWT_SECRET) as JwtPayload;
 				const userId: string = decoded.userId as string;
 
-				req.user = (await User.findById(userId).select("-password")) as UserType;
+				req.user = await User.findById(userId).select(["-password", "-__v"]);
 
 				next();
 			} catch (error: any) {
