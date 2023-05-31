@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
-import { Document } from "mongoose";
 import asyncHandler from "express-async-handler";
-import generateToken from "../utils/generateToken.ts";
+import generateToken from "../utils/generateToken";
 
-import User from "../models/userModel.ts";
+import User, { UserType } from "../models/userModel.ts";
 
 interface RequestBody {
 	name: string;
@@ -82,11 +81,18 @@ const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<voi
 	res.status(200).json({ message: "User logged out" });
 });
 
+interface UserProfileRequest extends Request {
+	user?: UserType;
+}
+
 // @desc    Get user profile
 // route    GET /api/users/profile
 // @access  Private
-const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
-	res.status(200).json({ message: "User profile" });
+const getUserProfile = asyncHandler(async (req: UserProfileRequest, res: Response) => {
+	const { _id, name, email, createdAt, updatedAt } = req.user as UserType;
+	const user: UserType = { _id, name, email, createdAt, updatedAt } as UserType;
+
+	res.status(200).json(user);
 });
 
 // @desc    Update user profile

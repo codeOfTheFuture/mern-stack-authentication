@@ -14,6 +14,16 @@ const notFound = (req: Request, res: Response, next: NextFunction): void => {
 	next(error);
 };
 
+/**
+ * Error handler middleware for handling and sending error responses.
+ *
+ * @function errorHandler
+ * @param {any} error - The error object.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @param {NextFunction} next - The next middleware function.
+ * @returns {void}
+ */
 const errorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
 	let statusCode: number;
 	let message: string;

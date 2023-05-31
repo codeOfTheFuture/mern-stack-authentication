@@ -2,10 +2,11 @@ import express, { Express } from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import colors from "colors";
-import { notFound, errorHandler } from "./middleware/errorMiddleware.ts";
-import connectDB from "./config/db.ts";
+import cookieParser from "cookie-parser";
+import { notFound, errorHandler } from "./middleware/errorMiddleware";
+import connectDB from "./config/db";
 
-import userRoutes from "./routes/userRoutes.ts";
+import userRoutes from "./routes/userRoutes";
 
 connectDB();
 
@@ -13,6 +14,8 @@ const app: Express = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cookieParser());
 
 app.use("/api/users", userRoutes);
 
