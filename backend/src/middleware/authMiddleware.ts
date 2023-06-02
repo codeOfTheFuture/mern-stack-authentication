@@ -1,9 +1,10 @@
+import { NextFunction, Request, Response } from "express";
+import { Document, ObjectId } from "mongoose";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
-import { NextFunction, Request, Response } from "express";
+import { User as UserType, SchemaMethods } from "../types/types";
 
-import User, { SchemaMethods, UserType } from "../models/userModel";
-import { Document, ObjectId } from "mongoose";
+import User from "../models/userModel";
 
 const JWT_SECRET: string = process.env.JWT_SECRET as string;
 

@@ -1,18 +1,36 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import generateToken from "../utils/generateToken";
+import { User as UserType } from "../types/types";
 
-import User, { UserType } from "../models/userModel.ts";
+import User from "../models/userModel.ts";
 
+/**
+ * Request body interface for user data.
+ *
+ * @interface ReqBody
+ * @property {string} name - The name of the user.
+ * @property {string} email - The email of the user.
+ * @property {string} password - The password of the user.
+ */
 interface ReqBody {
 	name: string;
 	email: string;
 	password: string;
 }
 
-// @desc    Auth user/set token
-// route    POST /api/users/auth
-// @access  Public
+/**
+ * Authenticate user and set token.
+ *
+ *  - Route - POST /api/user/auth
+ * @access Public
+ *
+ * @function authUser
+ * @param {Request<null, null, ReqBody>} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If the email or password is invalid.
+ */
 const authUser = asyncHandler(
 	async (req: Request<null, null, ReqBody>, res: Response): Promise<void> => {
 		const { email, password } = req.body;
@@ -26,6 +44,8 @@ const authUser = asyncHandler(
 				_id: user._id,
 				name: user.name,
 				email: user.email,
+				createdAt: user.createdAt,
+				updatedAt: user.updatedAt,
 			});
 		} else {
 			res.status(401);
@@ -34,9 +54,18 @@ const authUser = asyncHandler(
 	}
 );
 
-// @desc    Register a new user
-// route    POST /api/users
-// @access  Public
+/**
+ * Register a new user.
+ *
+ * - Route - POST /api/users
+ * @access Public
+ *
+ * @function registerUser
+ * @param {Request<null, null, ReqBody>} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If the user already exists or the user data is invalid.
+ */
 const registerUser = asyncHandler(
 	async (req: Request<null, null, ReqBody>, res: Response): Promise<void> => {
 		const { name, email, password } = req.body;
@@ -61,6 +90,8 @@ const registerUser = asyncHandler(
 				_id: user._id,
 				name: user.name,
 				email: user.email,
+				createdAt: user.createdAt,
+				updatedAt: user.updatedAt,
 			});
 		} else {
 			res.status(400);
@@ -69,9 +100,17 @@ const registerUser = asyncHandler(
 	}
 );
 
-// @desc    Logout user
-// route    POST /api/users/logout
-// @access  Public
+/**
+ * Logout the user.
+ *
+ * - Route - POST /api/user/logout
+ * @access Public
+ *
+ * @function logoutUser
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Promise<void>}
+ */
 const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
 	res.cookie("jwt", "", {
 		httpOnly: true,
@@ -81,23 +120,48 @@ const logoutUser = asyncHandler(async (req: Request, res: Response): Promise<voi
 	res.status(200).json({ message: "User logged out" });
 });
 
+/**
+ * Extended request object for user profile requests.
+ *
+ * @interface UserProfileRequest
+ * @extends Request
+ * @template ReqBody - The type of the request body.
+ * @property {UserType} user - The user object.
+ * @property {ReqBody} body - The request body.
+ */
 interface UserProfileRequest<ReqBody = any> extends Request {
 	user?: UserType;
 	body: ReqBody;
 }
 
-// @desc    Get user profile
-// route    GET /api/users/profile
-// @access  Private
+/**
+ * Get user profile.
+ *
+ * - Route - GET /api/users/profile
+ * @access Private
+ *
+ * @function getUserProfile
+ * @param {UserProfileRequest<ReqBody>} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Promise<void>}
+ */
 const getUserProfile = asyncHandler(
 	async (req: UserProfileRequest<ReqBody>, res: Response): Promise<void> => {
 		res.status(200).json(req.user);
 	}
 );
 
-// @desc    Update user profile
-// route    PUT /api/users/profile
-// @access  Private
+/**
+ * Update user profile.
+ *
+ * - Route - PUT /api/users/profile
+ * @access Private
+ *
+ * @function updateUserProfile
+ * @param {UserProfileRequest<ReqBody>} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @returns {Promise<void>}
+ */
 const updateUserProfile = asyncHandler(
 	async (req: UserProfileRequest<ReqBody>, res: Response): Promise<void> => {
 		const user = await User.findById(req.user?._id);

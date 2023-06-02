@@ -6,7 +6,9 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node backend/dist/server.js",
-    "server": "nodemon --watch \"backend/src\" --ext \"ts, json\" --exec \"ts-node backend/src/server.ts\""
+    "server": "nodemon --watch \"backend/src\" --ext \"ts, json\" --exec \"ts-node backend/src/server.ts\"",
+    "client": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "Jeff Oliver",
   "license": "MIT",
