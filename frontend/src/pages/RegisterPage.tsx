@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import FormContainer from "../components/FormContainer";
 
-const LoginPage = () => {
+const RegisterPage = () => {
+	const [name, setName] = useState<string>("");
 	const [email, setEmail] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
+	const [confirmPassword, setConfirmPassword] = useState<string>("");
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
@@ -14,9 +16,19 @@ const LoginPage = () => {
 
 	return (
 		<FormContainer>
-			<h1>Sign In</h1>
+			<h1>Sign Up</h1>
 
 			<Form onSubmit={handleSubmit}>
+				<Form.Group className="my-2" controlId="name">
+					<Form.Label>Name</Form.Label>
+					<Form.Control
+						type="text"
+						placeholder="Enter Name"
+						value={name}
+						onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+					></Form.Control>
+				</Form.Group>
+
 				<Form.Group className="my-2" controlId="email">
 					<Form.Label>Email Address</Form.Label>
 					<Form.Control
@@ -26,6 +38,7 @@ const LoginPage = () => {
 						onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
 					></Form.Control>
 				</Form.Group>
+
 				<Form.Group className="my-2" controlId="password">
 					<Form.Label>Password</Form.Label>
 					<Form.Control
@@ -36,17 +49,27 @@ const LoginPage = () => {
 					></Form.Control>
 				</Form.Group>
 
+				<Form.Group className="my-2" controlId="confirmPassword">
+					<Form.Label>Confirm Password</Form.Label>
+					<Form.Control
+						type="password"
+						placeholder="Confirm Password"
+						value={confirmPassword}
+						onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+					></Form.Control>
+				</Form.Group>
+
 				<Button type="submit" variant="primary" className="mt-3">
-					Sign In
+					Sign Up
 				</Button>
 
 				<Row className="py-3">
 					<Col>
-						New Customer? <Link to="/register">Register</Link>
+						Already have an account? <Link to="/login">Login</Link>
 					</Col>
 				</Row>
 			</Form>
 		</FormContainer>
 	);
 };
-export default LoginPage;
+export default RegisterPage;
