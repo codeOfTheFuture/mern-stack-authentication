@@ -1,15 +1,41 @@
-import { useState, FormEvent, ChangeEvent } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, FormEvent, ChangeEvent } from "react";
+import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 import { Form, Button, Row, Col } from "react-bootstrap";
+import { useAppSelector, useAppDispatch } from "../hooks/hooks";
 import FormContainer from "../components/FormContainer";
+import { useLoginMutation } from "../redux/slices/usersApiSlice";
+import { UserInfo, setCredentials } from "../redux/slices/authSlice";
+import { RootState } from "../redux/store";
+import { AnyAction, Dispatch, ThunkDispatch } from "@reduxjs/toolkit";
 
 const LoginPage = () => {
 	const [email, setEmail] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
 
-	const handleSubmit = async (e: FormEvent) => {
+	const navigate: NavigateFunction = useNavigate();
+	const dispatch: ThunkDispatch<RootState, null, AnyAction> & Dispatch<AnyAction> =
+		useAppDispatch();
+
+	const [login] = useLoginMutation();
+
+	const { userInfo } = useAppSelector((state: RootState) => state.auth);
+
+	useEffect(() => {
+		if (userInfo) {
+			navigate("/");
+		}
+	}, [userInfo, navigate]);
+
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		console.log("submit");
+
+		try {
+			const res: UserInfo = await login({ email, password }).unwrap();
+			dispatch(setCredentials({ ...res }));
+			navigate("/");
+		} catch (error) {
+			console.error(error.data.message || error);
+		}
 	};
 
 	return (
