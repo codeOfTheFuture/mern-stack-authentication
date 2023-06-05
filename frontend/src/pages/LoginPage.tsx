@@ -1,12 +1,13 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from "react";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 import { Form, Button, Row, Col } from "react-bootstrap";
+import { AnyAction, Dispatch, ThunkDispatch } from "@reduxjs/toolkit";
+import { RootState } from "../redux/store";
+import { UserInfo, setCredentials } from "../redux/slices/authSlice";
+import { useLoginMutation } from "../redux/slices/usersApiSlice";
 import { useAppSelector, useAppDispatch } from "../hooks/hooks";
 import FormContainer from "../components/FormContainer";
-import { useLoginMutation } from "../redux/slices/usersApiSlice";
-import { UserInfo, setCredentials } from "../redux/slices/authSlice";
-import { RootState } from "../redux/store";
-import { AnyAction, Dispatch, ThunkDispatch } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 
 const LoginPage = () => {
 	const [email, setEmail] = useState<string>("");
@@ -34,7 +35,7 @@ const LoginPage = () => {
 			dispatch(setCredentials({ ...res }));
 			navigate("/");
 		} catch (error) {
-			console.error(error.data.message || error);
+			toast.error(error.data.message || "Error");
 		}
 	};
 
